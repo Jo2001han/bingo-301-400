@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>QR Bingo – Imprimir Tarjetas 101–200</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@700;800&display=swap');
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: #f5f0e8;
+    font-family: 'Nunito', sans-serif;
+    padding: 20px;
+  }
+
+  /* ---- PANTALLA: instrucciones ---- */
+  .screen-only {
+    text-align: center;
+    padding: 30px 20px 10px;
+  }
+  .screen-only h1 {
+    font-family: 'Fredoka One', cursive;
+    font-size: 2.4rem;
+    color: #7a3e00;
+    margin-bottom: 8px;
+  }
+  .screen-only p {
+    color: #9e6b20;
+    font-size: 1rem;
+    margin-bottom: 6px;
+  }
+  .btn-print {
+    display: inline-block;
+    margin-top: 14px;
+    background: #7a3e00;
+    color: #fff;
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.2rem;
+    border: none;
+    border-radius: 30px;
+    padding: 12px 36px;
+    cursor: pointer;
+    letter-spacing: 1px;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.18);
+  }
+  .btn-print:hover { background: #a0540a; }
+
+  /* ---- GRILLA DE QR ---- */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-top: 24px;
+    max-width: 960px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .qr-ticket {
+    background: #fffdf7;
+    border: 2.5px dashed #c9a84c;
+    border-radius: 14px;
+    padding: 12px 10px 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 7px;
+  }
+
+  .ticket-header {
+    font-family: 'Fredoka One', cursive;
+    font-size: 1rem;
+    color: #7a3e00;
+    letter-spacing: 1px;
+    text-align: center;
+  }
+
+  .bingo-label {
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.3rem;
+    letter-spacing: 4px;
+    display: flex;
+    gap: 3px;
+  }
+  .bingo-label span {
+    padding: 1px 5px;
+    border-radius: 5px;
+    color: #fff;
+    font-size: 0.85rem;
+  }
+  .b { background: #fa8072; }
+  .i { background: #f0a500; }
+  .n { background: #5dcb85; }
+  .g { background: #4da6ff; }
+  .o { background: #c97be0; }
+
+  .qr-box {
+    width: 130px;
+    height: 130px;
+    border: 1.5px solid #e8c97a;
+    border-radius: 8px;
+    overflow: hidden;
+    background: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .qr-box canvas, .qr-box img { display: block; }
+
+  .ticket-url {
+    font-size: 0.58rem;
+    color: #b5922a;
+    text-align: center;
+    word-break: break-all;
+    max-width: 130px;
+  }
+
+  .ticket-num {
+    font-family: 'Fredoka One', cursive;
+    font-size: 0.75rem;
+    color: #9e6b20;
+    background: #faeeda;
+    border-radius: 20px;
+    padding: 2px 12px;
+  }
+
+  /* ---- IMPRESIÓN ---- */
+  @media print {
+    @page { margin: 8mm; size: A4 portrait; }
+
+    body { background: #fff; padding: 0; }
+    .screen-only { display: none; }
+
+    .grid {
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      margin: 0;
+      max-width: 100%;
+    }
+
+    .qr-ticket {
+      border: 1.5px dashed #aaa;
+      border-radius: 10px;
+      padding: 8px 6px 6px;
+      break-inside: avoid;
+    }
+
+    .ticket-header { font-size: 0.85rem; }
+    .qr-box { width: 110px; height: 110px; }
+    .ticket-url { font-size: 0.52rem; }
+    .bingo-label span { font-size: 0.75rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="screen-only">
+  <h1>🎱 QR Bingo — Tarjetas 101 a 200</h1>
+  <p>Abre este archivo en <strong>Chrome o Edge</strong> y haz clic en el botón para imprimir.</p>
+  <p>Cada hoja tiene <strong>8 tarjetas QR</strong> listas para recortar y entregar.</p>
+  <button class="btn-print" onclick="window.print()">🖨️ Imprimir todas las tarjetas</button>
+</div>
+
+<div class="grid" id="grid"></div>
+
+<script>
+const BASE = "https://jo2001han.github.io/bingo2/";
+
+const grid = document.getElementById('grid');
+
+for (let num = 101; num <= 200; num++) {
+  const url = BASE + "#" + num;
+
+  const ticket = document.createElement('div');
+  ticket.className = 'qr-ticket';
+
+  ticket.innerHTML = `
+    <div class="ticket-header">Tarjeta #${num}</div>
+    <div class="bingo-label">
+      <span class="b">B</span>
+      <span class="i">I</span>
+      <span class="n">N</span>
+      <span class="g">G</span>
+      <span class="o">O</span>
+    </div>
+  `;
+
+  const qrBox = document.createElement('div');
+  qrBox.className = 'qr-box';
+  ticket.appendChild(qrBox);
+
+  new QRCode(qrBox, {
+    text: url,
+    width: 126,
+    height: 126,
+    colorDark: "#3c3489",
+    colorLight: "#ffffff",
+    correctLevel: QRCode.CorrectLevel.M
+  });
+
+  ticket.innerHTML += `
+    <div class="ticket-url">${url}</div>
+    <div class="ticket-num">🎱 ¡Toca para jugar!</div>
+  `;
+
+  // Re-append qrBox after innerHTML overwrite
+  const placeholder = ticket.querySelector('.qr-box');
+  placeholder.replaceWith(qrBox);
+
+  grid.appendChild(ticket);
+}
+</script>
+</body>
+</html>
